@@ -7,10 +7,10 @@ sys.path.insert(1, path_src)
 from utils import DB, Log, Settings, Creds
 from utils.errors import *
 from twitch.twitch_bot import TwitchBot
-from twitch.public_online import OnlineCog
-from twitch.mod import ModCog
-from AudioController.audio_controller import AudioController, Context
-from AudioController.spotify_api import Spotify
+from twitch.chat.online.public_online import OnlineCog
+from twitch.chat.mod.mod import ModCog
+from music.music_controller import AudioController, Context
+from integration.spotify.spotify_api import Spotify
 
 
 logger = Log('test', True, False)

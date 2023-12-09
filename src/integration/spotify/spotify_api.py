@@ -1,13 +1,13 @@
 import spotipy
-from utils import SpotifyCreds
+from configuration.configuration import ConfigurationSpotify
 from utils.errors import BadLink, NoCurrentTrack
 
 
 class Spotify:
-    def __init__(self, creds: SpotifyCreds):
+    def __init__(self, creds: ConfigurationSpotify):
         self.user = creds.username
         self.client_id = creds.client_id
-        self.secret = creds.client_secret
+        self.secret = creds.secret
         self.token = self.get_token()
         self.sp = self.auth()
         self.sp.search(q='test')
@@ -40,6 +40,21 @@ class Spotify:
         except IndexError:
             return None
 
+    def add_to_queue(self, uri):
+        try:
+            self.sp.add_to_queue(uri)
+        except IndexError:
+            return None
+
+    def get_current_playlist(self):
+        info = self.sp.current_playback()
+        if info is None:
+            return None
+        try:
+            return info['context']['external_urls']['spotify']
+        except (KeyError, TypeError):
+            return None
+
     def get_track_info(self, url=None, info=None):
 
         if url is None and info is None:
@@ -64,25 +79,6 @@ class Spotify:
         artists = artists.replace("'", '')
         return track, artists, link
 
-    @staticmethod
-    def get_track_info_list(info_all: list):
-        track_info_all = []
-        for info in info_all:
-            track = info['track']['name']
-            artists_info_all = info['track']['artists']
-            artists = []
-            for artist_info in artists_info_all:
-                artist = artist_info['name']
-                artists.append(artist)
-            artists = str(artists)
-            artists = artists.strip('[')
-            artists = artists.strip(']')
-            artists = artists.strip("'")
-            artists = artists.replace("'", '')
-            track_info = {'track': track, 'artist': artists}
-            track_info_all.append(track_info)
-        return track_info_all
-
     def get_current_track(self):
         try:
             info = self.sp.current_user_playing_track()['item']
@@ -92,14 +88,6 @@ class Spotify:
             return track, artist
         except TypeError:
             raise NoCurrentTrack
-
-    def get_recent_plays(self):
-        recent = self.sp.current_user_recently_played(limit=10)
-        info_all = recent['items']
-        info = []
-        for track in self.get_track_info_list(info_all):
-            info.append((track['track'], track['artist']))
-        return info
 
     def get_track_link(self, request):
         if 'open.spotify' in request:
@@ -179,43 +167,12 @@ class Spotify:
     def next(self):
         self.sp.next_track()
 
-    def play_pause(self):
+    def pause(self):
         playback = self.sp.current_playback()
         if playback['is_playing']:
             self.sp.pause_playback()
-            return True
-        else:
+
+    def play(self):
+        playback = self.sp.current_playback()
+        if not playback['is_playing']:
             self.sp.start_playback()
-            return False
-
-    def prev(self):
-        try:
-            link = self.sp.current_user_playing_track(
-            )['item']['external_urls']['spotify']
-            self.sp.start_playback(uris=[link])
-        except Exception as er:
-            print(er)
-
-    def play(self, link):
-        try:
-            self.sp.start_playback(uris=[link])
-        except spotipy.exceptions.SpotifyException:
-            pass
-
-    def get_current_playlist(self):
-        info = self.sp.current_playback()
-        if info is None:
-            return None
-        try:
-            return info['context']['external_urls']['spotify']
-        except (KeyError, TypeError):
-            return None
-
-    def get_queue(self):
-        info = self.sp.queue()
-        queue = info['queue']
-        queue_info = []
-        for track in queue:
-            queue_info.append(track['id'])
-        print(queue_info)
-        return queue_info
