@@ -1,0 +1,12 @@
+INIT_APP: 'Iniciando Bot'
+BOT_UP: BMusic está pronto para organizar suas músicas!
+NOT_FOUND_MUSIC_SPOTIFY: A música que procura não foi encontrada no Spotify
+MUSIC_ADD_SPOTIFY: A música {music} - {artist}, foi adicionado a fila, agora vamos ver se e boa!
+MUSIC_INFO_SPOTIFY: "E essa música que está tocando agora: {music} - {artist}!"
+SKIP_MUSIC_SPOTIFY: "Pulando a música então: {music} - {artist}!"
+PAUSE_MUSIC_SPOTIFY: "Pausando essa música: {music} - {artist}!"
+PLAY_MUSIC_SPOTIFY: "Bora escutar a música: {music} - {artist}!"
+
+
+
+COMMAND_NOT_FOUND: "Amigo, esse comando não existe: {command}, vamos olhar esse link com os comandos disponíveis: https://github.com/SawCunha/TwitchSpotifyBot/blob/main/Commands.md"
