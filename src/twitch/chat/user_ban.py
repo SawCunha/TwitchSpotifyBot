@@ -1,0 +1,2 @@
+class UserBan:
+    users = list()

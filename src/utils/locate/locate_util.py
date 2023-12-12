@@ -12,4 +12,3 @@ class LocateUtils:
 
     def translate(self, message_id: str, **kwargs):
         return self._(self.locale, f'message.{message_id}', **kwargs)
-

@@ -1,4 +1,3 @@
-from utils.db_handler import DB
 from utils.errors import TrackNotFound
 from integration.spotify.spotify_api import Spotify
 from utils import Log
@@ -6,8 +5,7 @@ from music.music_utils import is_spotify_link, process_spotify_link
 
 
 class MusicController:
-    def __init__(self, db: DB, spotify: Spotify, log: Log):
-        self.db = db
+    def __init__(self, spotify: Spotify, log: Log):
         self.spotify = spotify
         self.log = log
 

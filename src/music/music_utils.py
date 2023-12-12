@@ -9,7 +9,7 @@ def is_spotify_link(request: str):
     if any(link in request for link in LINKS_YOUTUBE):
         raise YoutubeLink
 
-    elif 'http' in request:
+    elif 'http:' in request:
         raise UnsupportedLink
 
     if any(link in request for link in LINKS_SPOTIFY):

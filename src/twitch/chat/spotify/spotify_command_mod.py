@@ -1,8 +1,7 @@
 from twitchio.ext import commands
-from utils import DB, Log
+from utils import Log
 from utils.errors import *
-from twitch.utils.twitch_utils import check_permission
-from configuration.configuration import Configuration
+from twitch.chat.user_ban import UserBan
 
 
 class SpotifyCommandMod(commands.Cog):
@@ -12,12 +11,17 @@ class SpotifyCommandMod(commands.Cog):
         self.bot = bot
         self.configuration = bot.configuration
         self.log: Log = bot.log
-        self.db: DB = bot.db
         self.music_controller = bot.music_controller
 
     async def cog_check(self, ctx: commands.Context) -> bool:
-        if not self.db.is_user_privileged(ctx.author.name.lower()) or not self.db.is_user_admin(ctx.author.name.lower()):
-            raise NotAuthorized('mod or admin')
+        user = ctx.author.name.lower()
+
+        if not ctx.author.is_mod and not ctx.author.is_broadcaster:
+            raise NotAuthorized('NOT_PERMISSION')
+
+        if user in UserBan.users:
+            raise UserBanned
+
         return True
 
     @commands.command(name='music-skip')
