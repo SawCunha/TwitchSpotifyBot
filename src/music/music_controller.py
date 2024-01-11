@@ -1,13 +1,10 @@
-from utils.errors import TrackNotFound
 from integration.spotify.spotify_api import Spotify
-from utils import Log
 from music.music_utils import is_spotify_link, process_spotify_link
 
 
 class MusicController:
-    def __init__(self, spotify: Spotify, log: Log):
+    def __init__(self, spotify: Spotify):
         self.spotify = spotify
-        self.log = log
 
     def add_to_queue(self, request: str):
         if is_spotify_link(request.strip()):
@@ -18,10 +15,9 @@ class MusicController:
         if link is not None:
             track, artist, link = self.spotify.get_track_info(url=link)
             self.spotify.add_to_queue(link)
+            return track, artist
         else:
-            raise TrackNotFound
-
-        return track, artist
+            return None, None
 
     def current_music(self):
         return self.spotify.get_current_track()

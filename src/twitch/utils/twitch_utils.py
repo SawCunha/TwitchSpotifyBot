@@ -1,20 +1,21 @@
-import twitchio
-from utils.errors import *
 from utils.enum.permission import Permission
 
 
 async def check_permission(user: twitchio.PartialChatter, permission: Permission, channel: str):
     if user.is_broadcaster:
         return True
-    if permission is Permission.SUBS:
+    if permission is Permission.ALL.name:
+        return True
+    if permission is Permission.SUBS.name:
         if not user.is_subscriber:
             raise BadPerms('subscriber')
-    if permission is Permission.FOLLOWERS:
+    if permission is Permission.FOLLOWERS.name:
         if not await is_follower(user, channel):
             raise BadPerms('follower')
-    if permission is Permission.PRIVILEGED:
+    if permission is Permission.PRIVILEGED.name:
         if not await is_privileged(user):
             raise BadPerms('mod, subscriber or vip')
+
 
 
 async def is_follower(user: twitchio.PartialChatter, channel: str):

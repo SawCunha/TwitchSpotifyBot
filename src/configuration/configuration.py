@@ -1,72 +1,45 @@
 import configparser
 
-from configuration.configurationApp import ConfigurationApp
-from configuration.configurationTwitch import ConfigurationTwitch
-from configuration.configurationSpotify import ConfigurationSpotify
-from configuration.configurationBot import ConfigurationBot
-from configuration.configurationBotSpotify import ConfigurationBotSpotify
-from utils.enum.permission import Permission
+from configuration.configuration_twitch import ConfigurationTwitch
+from configuration.command.command_process import process_commands
+from configuration.routines.routine_process import process_routines
+from configuration.configuration_spotify import ConfigurationSpotify
+from configuration.configuration_openai import ConfigurationOpenAi
 from utils import LocateUtils
 
 
 class Configuration:
     def __init__(self) -> None:
-        self.app: ConfigurationApp = None
         self.twitch: ConfigurationTwitch = None
         self.spotify: ConfigurationSpotify = None
-        self.bot: ConfigurationBot = None
-        self.botSpotify: ConfigurationBotSpotify = None
         self._Process_configuration()
-        self.locate = LocateUtils(self.app.language)
+        self.locate = LocateUtils()
 
     def _Process_configuration(self):
         config = configparser.ConfigParser()
-        with open('./secret/configuration.ini') as file:
+        with open('./data/configuration.ini') as file:
             config.read_file(file)
-            self._Process_configuration_app(config)
             self._Process_configuration_twitch(config)
             self._Process_configuration_spotify(config)
-            self._Process_configuration_bot(config)
-            self._Process_configuration_bot_spotify(config)
-
-    def _Process_configuration_app(self, config_app):
-        log: bool = config_app.getboolean('APP', 'log')
-        dev: bool = config_app.getboolean('APP', 'dev')
-        language: str = config_app.get('APP', 'language')
-        self.app = ConfigurationApp(log, dev, language)
+            self._Process_configuration_openai(config)
 
     def _Process_configuration_twitch(self, config_app):
-        active: bool = config_app.getboolean('TWITCH', 'active')
-        token: str = config_app.get('TWITCH', 'token')
-        channel: str = config_app.get('TWITCH', 'channel')
-        self.twitch = ConfigurationTwitch(active, token, channel)
+        my_app_id: str = config_app.get('TWITCH', 'my_app_id', fallback=None)
+        my_app_secret: str = config_app.get('TWITCH', 'my_app_secret', fallback=None)
+        channel: str = config_app.get('TWITCH', 'channel', fallback=None)
+        commands = process_commands()
+        routines = process_routines()
+        self.twitch = ConfigurationTwitch(my_app_id, my_app_secret, channel, commands, routines)
 
     def _Process_configuration_spotify(self, config_app):
-        client_id: str = config_app.get('SPOTIFY', 'client_id')
-        secret: str = config_app.get('SPOTIFY', 'secret')
-        username: str = config_app.get('SPOTIFY', 'username')
-        self.spotify = ConfigurationSpotify(client_id, secret, username)
+        active: bool = config_app.getboolean('SPOTIFY', 'active', fallback=False)
+        client_id: str = config_app.get('SPOTIFY', 'client_id', fallback=None)
+        secret: str = config_app.get('SPOTIFY', 'secret', fallback=None)
+        username: str = config_app.get('SPOTIFY', 'username', fallback=None)
+        self.spotify = ConfigurationSpotify(active, client_id, secret, username)
 
-    def _Process_configuration_bot(self, config_app):
-        active: bool = config_app.getboolean('BOT', 'active')
-        permission: Permission = Permission(config_app.get('BOT', 'permission').lower())
-        self.bot = ConfigurationBot(active, permission)
-
-    def _Process_configuration_bot_spotify(self, config_app):
-        active: bool = config_app.getboolean('BOT_SPOTIFY', 'active')
-        self.botSpotify = ConfigurationBotSpotify(active)
-
-
-    # @property
-    # def app(self):
-    #     return self.app
-    #
-    #
-    # @property
-    # def spotify(self):
-    #     return self.spotify
-    #
-    #
-    # @property
-    # def twitch(self):
-    #     return self.twitch
+    def _Process_configuration_openai(self, config_app):
+        active: bool = config_app.getboolean('OPENAI', 'active', fallback=False)
+        api_key: str = config_app.get('OPENAI', 'api_key', fallback=None)
+        gpt_model: str = config_app.get('OPENAI', 'gpt_model', fallback=None)
+        self.openai = ConfigurationOpenAi(active, api_key, gpt_model)

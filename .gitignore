@@ -8,3 +8,5 @@ src/db-test.py
 /.vscode
 .prettierignore
 */**/__pycache__
+src/build
+src/dist

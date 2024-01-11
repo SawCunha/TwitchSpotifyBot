@@ -1,4 +1,3 @@
-INIT_APP: 'Iniciando Bot'
 BOT_UP: BMusic está pronto para organizar suas músicas!
 NOT_FOUND_MUSIC_SPOTIFY: A música que procura não foi encontrada no Spotify
 MUSIC_ADD_SPOTIFY: A música {music} - {artist}, foi adicionado a fila, agora vamos ver se e boa!
@@ -9,12 +8,12 @@ PLAY_MUSIC_SPOTIFY: "Bora escutar a música: {music} - {artist}!"
 
 
 
-COMMAND_NOT_FOUND: "Amigo, esse comando não existe: {command}, vamos olhar esse link com os comandos disponíveis: https://github.com/SawCunha/TwitchSpotifyBot/blob/main/Commands.md"
 LINK_COMMAND: "Para pedir musica só olhar esse link com os comandos disponíveis: https://github.com/SawCunha/TwitchSpotifyBot/blob/main/Commands.md"
 NOT_PERMISSION: "Você não tem permissão para usar esse comando: '{command}'!"
 USER_BAN: "Você acabou de ser banido, sem músicas para ti."
 USER_UNBAN: "Pule de alegria, tu agora pode pedir música de novo, não está mais banido"
 USER_BANNED: "Você foi banido, não pode mais pedir música nessa Live."
+REDEEM: "Aqui tem alguns trem para usar: https://streamelements.com/sawcunha-1266/store"
 
 
 

@@ -1,6 +1,5 @@
 import spotipy
 from configuration.configuration import ConfigurationSpotify
-from utils.errors import BadLink, NoCurrentTrack
 
 
 class Spotify:
@@ -13,7 +12,7 @@ class Spotify:
         self.sp.search(q='test')
 
     def get_token(self):
-        cache_path = f'./secret/.cache-{self.user}'
+        cache_path = f'./data/.cache-{self.user}'
         handler = spotipy.oauth2.CacheFileHandler(cache_path=cache_path,
                                                   username=self.user)
 
@@ -25,14 +24,18 @@ class Spotify:
                                     client_secret=self.secret,
                                     redirect_uri='https://open.spotify.com/',
                                     cache_handler=handler,
-                                    open_browser=False, scope=scopes)
+                                    open_browser=True, scope=scopes)
 
     def auth(self):
-        return spotipy.Spotify(auth_manager=self.token)
+        return spotipy.Spotify(auth_manager=self.token, requests_session=True, retries=5, status_retries=5)
+
+    def get_sp(self):
+        self.sp = self.auth()
+        return self.sp
 
     def search_song(self, query):
         try:
-            results = self.sp.search(query, limit=1, type='track')
+            results = self.get_sp().search(query, limit=1, type='track')
             if results is None:
                 return None
             else:
@@ -42,12 +45,13 @@ class Spotify:
 
     def add_to_queue(self, uri):
         try:
-            self.sp.add_to_queue(uri)
+            self.get_sp().add_to_queue(uri)
         except IndexError:
             return None
 
     def get_current_playlist(self):
-        info = self.sp.current_playback()
+
+        info = self.get_sp().current_playback()
         if info is None:
             return None
         try:
@@ -58,12 +62,12 @@ class Spotify:
     def get_track_info(self, url=None, info=None):
 
         if url is None and info is None:
-            raise BadLink
+            return None, None, None
 
         if info is None:
-            info = self.sp.track(url)
+            info = self.get_sp().track(url)
             if info is None:
-                raise BadLink
+                return None, None, None
 
         link = info['external_urls']['spotify']
         track = info['name']
@@ -81,13 +85,13 @@ class Spotify:
 
     def get_current_track(self):
         try:
-            info = self.sp.current_user_playing_track()['item']
+            info = self.get_sp().current_user_playing_track()['item']
             if info is None:
-                raise NoCurrentTrack
+                return None, None
             track, artist, _ = self.get_track_info(info=info)
             return track, artist
         except TypeError:
-            raise NoCurrentTrack
+            return None, None
 
     def get_track_link(self, request):
         if 'open.spotify' in request:
@@ -121,14 +125,14 @@ class Spotify:
 
     def skip(self):
         track, artist = self.get_current_track()
-        self.sp.next_track()
+        self.get_sp().next_track()
         return track, artist
 
-    def get_context(self) -> dict:
+    def get_context(self) -> dict | None:
         try:
-            info = self.sp.current_user_playing_track()
+            info = self.get_sp().current_user_playing_track()
             if info is None:
-                raise NoCurrentTrack
+                return None
             track = info['item']['name']
             artists_info_all = info['item']['artists']
             artists = []
@@ -162,17 +166,17 @@ class Spotify:
                     'paused': paused}
         except TypeError as er:
             print(er)
-            raise NoCurrentTrack
+            return None
 
     def next(self):
-        self.sp.next_track()
+        self.get_sp().next_track()
 
     def pause(self):
-        playback = self.sp.current_playback()
+        playback = self.get_sp().current_playback()
         if playback['is_playing']:
-            self.sp.pause_playback()
+            self.get_sp().pause_playback()
 
     def play(self):
-        playback = self.sp.current_playback()
+        playback = self.get_sp().current_playback()
         if not playback['is_playing']:
-            self.sp.start_playback()
+            self.get_sp().start_playback()

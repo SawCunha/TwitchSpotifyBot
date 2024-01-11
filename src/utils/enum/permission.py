@@ -1,8 +1,18 @@
 from enum import Enum
 
 
+def get_permission(permission: str):
+    try:
+        return Permission[permission.upper()]
+    except:
+        return Permission.ALL
+
+
 class Permission(Enum):
     ALL = 'all'
-    SUBS = 'subs'
+    SUBSCRIBER = 'subscriber'
     FOLLOWERS = 'followers'
-    PRIVILEGED = 'privileged'
+    MOD = 'mod'
+    VIP = 'vip'
+    TURBO = 'turbo'
+

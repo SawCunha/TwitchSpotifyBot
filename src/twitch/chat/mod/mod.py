@@ -1,38 +1,39 @@
-from twitchio.ext import commands
-from utils.errors import *
-from utils import Log
 from twitch.chat.user_ban import UserBan
+from twitchAPI.chat import Chat, ChatCommand
+from twitch.chat.middleware.permission_middleware import PermissionMiddleware
+from twitch.chat.middleware.user_banned import UserBanned
 
 
-class ModCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.configuration = bot.configuration
-        self.log: Log = bot.log
+class Mod:
+    def __init__(self, chat, locate):
+        self.chat: Chat = chat
+        self.locate = locate
+        self._create_commands()
 
-    async def cog_check(self, ctx: commands.Context) -> bool:
-        if not ctx.author.is_mod and not ctx.author.is_broadcaster:
-            raise NotAuthorized('NOT_PERMISSION')
-        return True
+    def _create_commands(self):
+        command_middleware = [PermissionMiddleware(locate=self.locate), UserBanned(locate=self.locate)]
 
-    @commands.command(name='music-ban')
-    async def ban_command(self, ctx: commands.Context):
-        request = ctx.message.content.split(' ')[1].lower()
+        self.chat.register_command('music-ban', self.ban_command, command_middleware=command_middleware)
+        self.chat.register_command('music-unban', self.unban_command, command_middleware=command_middleware)
 
-        if request not in UserBan.users:
-            UserBan.users.append(request)
+    async def ban_command(self, cmd: ChatCommand):
+        user = cmd.parameter.lower()
 
-        resp = self.configuration.locate.translate('USER_BAN')
-        await ctx.reply(resp)
-        self.log.resp(resp)
+        if user not in UserBan.users:
+            UserBan.users.append(user)
 
-    @commands.command(name='music-unban')
-    async def unban_command(self, ctx: commands.Context):
-        request = ctx.message.content.split(' ')[1].lower()
+        resp = self.locate.translate('USER_BAN')
+        await cmd.reply(resp)
 
-        if request in UserBan.users:
-            UserBan.users.remove(request)
+    async def unban_command(self, cmd: ChatCommand):
+        user = cmd.parameter.lower()
 
-        resp = self.configuration.locate.translate('USER_UNBAN')
-        await ctx.reply(resp)
-        self.log.resp(resp)
+        if user in UserBan.users:
+            UserBan.users.remove(user)
+
+        resp = self.locate.translate('USER_UNBAN')
+        await cmd.reply(resp)
+
+    def unregister_commands(self):
+        self.chat.unregister_command('music-ban')
+        self.chat.unregister_command('music-unban')
